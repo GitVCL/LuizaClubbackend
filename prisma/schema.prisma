@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id      String    @id @default(uuid())
+  email   String    @unique
+  senha   String
+  produtos Produto[]
+  comandas Comanda[]
+  quartos Quarto[]
+  finalizados Finalizado[]
+}
+
+model Produto {
+  id        String   @id @default(uuid())
+  nome      String
+  valor     Float
+  unidades  Int
+  variantes String[]
+  userId    String
+  usuario   Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Comanda {
+  id        String   @id @default(uuid())
+  nome      String
+  itens     Json
+  total     Float
+  dono      String
+  status    String
+  criadaEm  DateTime @default(now())
+  encerradaEm DateTime?
+  userId    String
+  usuario   Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Quarto {
+  id          String   @id @default(uuid())
+  nome        String
+  tempo       String
+  valor       Float
+  observacoes String
+  multa       Float
+  taxa        Float
+  itens       Json
+  status      String   @default("ativo")
+  criadaEm    DateTime @default(now())
+  encerradoEm DateTime?
+  userId      String
+  usuario     Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
+
+model Finalizado {
+  id        String   @id @default(uuid())
+  tipo      String   // 'comanda' ou 'quarto'
+  data      DateTime @default(now())
+  itens     Json
+  total     Float
+  dono      String?
+  userId    String
+  usuario   Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

@@ -1,40 +1,35 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
-const progressRoutes = require('./routes/progressRoutes');
-const timeRoutes = require('./routes/timeRoutes');
-const comandaRoutes = require('./routes/comandaRoutes'); // ✅ aqui
-const quartoRoutes = require('./routes/quartoRoutes');
-const produtoRoutes = require('./routes/produtoRoutes');
-const finalizadosRoutes = require('./routes/finalizadosRoutes');
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
+import authRoutes from './src/routes/authRoutes.js';
+import comandaRoutes from './src/routes/comandaRoutes.js';
+import quartosRoutes from './src/routes/quartosRoutes.js';
+import finalizadosRoutes from './src/routes/finalizadosRoutes.js';
+import cardapioRoutes from './src/routes/cardapioRoutes.js';
+import relatorioRoutes from './src/routes/relatorioRoutes.js';
 
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
 
-
-app.use('/api/quartos', quartoRoutes);
-app.use('/api/time', timeRoutes);
+// Rotas
 app.use('/api/auth', authRoutes);
-app.use('/api/progress', progressRoutes);
-app.use('/api/comandas', comandaRoutes); // ✅ aqui
-app.use('/api/produtos', produtoRoutes);
+app.use('/api/comandas', comandaRoutes);
+app.use('/api/quartos', quartosRoutes);
 app.use('/api/finalizados', finalizadosRoutes);
+app.use('/api/produtos', cardapioRoutes);
+app.use('/api/relatorios', relatorioRoutes);
 
+// Root simples para teste
+app.get('/', (req, res) => {
+  res.send('Luiza Club API rodando com sucesso!');
+});
 
-
-
-const PORT = process.env.PORT || 5000;
-
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('✅ Conectado ao MongoDB');
-    app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
-  })
-  .catch((err) => console.error('❌ Erro ao conectar no MongoDB:', err));
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
