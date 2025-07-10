@@ -22,20 +22,31 @@ router.get('/comandas/:userId', async (req, res) => {
   }
 });
 
-// Buscar quartos finalizados
-router.get('/quartos/:userId', async (req, res) => {
+
+// Buscar finalizados por período
+router.get('/periodo', async (req, res) => {
+  const { inicio, fim, userId } = req.query;
+
+  if (!inicio || !fim || !userId) {
+    return res.status(400).json({ error: 'Parâmetros ausentes' });
+  }
+
   try {
-    const finalizados = await prisma.quarto.findMany({
+    const finalizados = await prisma.comanda.findMany({
       where: {
-        userId: req.params.userId,
-        status: 'finalizado'
-      },
-      include: { itens: true }
+        userId: userId,
+        status: 'finalizada',
+          encerradaEm: {
+        gte: new Date(inicio),
+        lte: new Date(fim + 'T23:59:59')
+      }
+      }
     });
+
     res.json(finalizados);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erro ao buscar quartos finalizados' });
+    console.error('Erro ao buscar finalizados por período:', err);
+    res.status(500).json({ error: 'Erro ao buscar finalizados por período' });
   }
 });
 
