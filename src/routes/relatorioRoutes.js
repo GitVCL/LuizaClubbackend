@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Utilitário para períodos fixos
 function getRange(tipo) {
   const agora = new Date();
   const inicio = new Date(agora);
@@ -15,7 +16,7 @@ function getRange(tipo) {
       break;
     case 'semana':
       const diaDaSemana = inicio.getDay();
-      inicio.setDate(inicio.getDate() - diaDaSemana);
+      inicio.setDate(inicio.getDate() - (diaDaSemana === 0 ? 6 : diaDaSemana - 1));
       inicio.setHours(0, 0, 0, 0);
       break;
     case 'mes':
@@ -31,6 +32,7 @@ function getRange(tipo) {
   return { inicio, fim: agora };
 }
 
+// 🔹 Relatório por período padrão (dia, semana, mês, ano)
 async function buscarRelatorio(userId, tipo) {
   const { inicio, fim } = getRange(tipo);
 
@@ -46,65 +48,94 @@ async function buscarRelatorio(userId, tipo) {
     where: {
       userId,
       status: 'finalizado',
-      encerradoEm: { gte: inicio, lte: fim } // CORRIGIDO AQUI ✅
+      encerradoEm: { gte: inicio, lte: fim }
     }
   });
 
   return { comandas, quartos };
 }
 
-// Rota base (todos finalizados)
-router.get('/:userId', async (req, res) => {
+// 🔹 Rota: /api/relatorio/periodo?inicio=...&fim=...&userId=...
+router.get('/periodo', async (req, res) => {
   try {
-    const data = await buscarRelatorio(req.params.userId, 'ano');
-    res.json(data);
+    const { inicio, fim, userId } = req.query;
+
+    if (!inicio || !fim || !userId) {
+      return res.status(400).json({ error: 'Parâmetros "inicio", "fim" e "userId" são obrigatórios.' });
+    }
+
+    const inicioDate = new Date(inicio);
+    const fimDate = new Date(fim);
+
+    const comandas = await prisma.comanda.findMany({
+      where: {
+        userId,
+        status: 'finalizada',
+        encerradaEm: { gte: inicioDate, lte: fimDate }
+      }
+    });
+
+    const quartos = await prisma.quarto.findMany({
+      where: {
+        userId,
+        status: 'finalizado',
+        encerradoEm: { gte: inicioDate, lte: fimDate }
+      }
+    });
+
+    const todos = [...comandas, ...quartos];
+    res.json(todos);
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erro ao buscar dados do relatório' });
+    console.error('Erro ao buscar finalizados por período:', err);
+    res.status(500).json({ error: 'Erro ao buscar finalizados por período', detalhes: err.message });
   }
 });
 
-// Por dia
+// 🔹 Relatórios padrão
 router.get('/dia/:userId', async (req, res) => {
   try {
     const data = await buscarRelatorio(req.params.userId, 'dia');
     res.json(data);
   } catch (err) {
-    console.error('Erro no relatório diário:', err);
     res.status(500).json({ error: 'Erro no relatório diário', detalhes: err.message });
   }
 });
 
-// Por semana
 router.get('/semana/:userId', async (req, res) => {
   try {
     const data = await buscarRelatorio(req.params.userId, 'semana');
     res.json(data);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Erro no relatório semanal' });
   }
 });
 
-// Por mês
 router.get('/mes/:userId', async (req, res) => {
   try {
     const data = await buscarRelatorio(req.params.userId, 'mes');
     res.json(data);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Erro no relatório mensal' });
   }
 });
 
-// Por ano
 router.get('/ano/:userId', async (req, res) => {
   try {
     const data = await buscarRelatorio(req.params.userId, 'ano');
     res.json(data);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Erro no relatório anual' });
+  }
+});
+
+// 🔹 Rota padrão (ano por padrão)
+router.get('/:userId', async (req, res) => {
+  try {
+    const data = await buscarRelatorio(req.params.userId, 'ano');
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar dados do relatório' });
   }
 });
 
