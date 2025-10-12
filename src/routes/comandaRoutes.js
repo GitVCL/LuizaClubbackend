@@ -1,6 +1,7 @@
 // routes/comandaRoutes.js
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import { gerarComandaPDF } from '../../utils/pdfService.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -79,6 +80,31 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao deletar comanda' });
+  }
+});
+
+// 🖨️ IMPRIMIR COMANDA EM PDF
+router.get('/pdf/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const comanda = await prisma.comanda.findUnique({
+      where: { id }
+    });
+
+    if (!comanda) {
+      return res.status(404).json({ error: 'Comanda não encontrada' });
+    }
+
+    const pdfBuffer = await gerarComandaPDF(comanda);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="comanda-${comanda.nome}-${id}.pdf"`);
+    res.send(pdfBuffer);
+
+  } catch (err) {
+    console.error('Erro ao gerar PDF:', err);
+    res.status(500).json({ error: 'Erro ao gerar PDF da comanda' });
   }
 });
 

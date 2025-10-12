@@ -7,6 +7,8 @@ import comandaRoutes from './src/routes/comandaRoutes.js';
 import finalizadosRoutes from './src/routes/finalizadosRoutes.js';
 import cardapioRoutes from './src/routes/cardapioRoutes.js';
 import relatorioRoutes from './src/routes/relatorioRoutes.js';
+import drinksRoutes from './src/routes/drinksRoutes.js';
+import quartosRoutes from './src/routes/quartosRoutes.js';
 
 dotenv.config();
 
@@ -22,6 +24,8 @@ app.use('/api/comandas', comandaRoutes);
 app.use('/api/finalizados', finalizadosRoutes);
 app.use('/api/produtos', cardapioRoutes);
 app.use('/api/relatorios', relatorioRoutes);
+app.use('/api/drinks', drinksRoutes);
+app.use('/api/quartos', quartosRoutes);
 
 // Root simples para teste
 app.get('/', (req, res) => {

@@ -15,6 +15,7 @@ model Usuario {
   comandas Comanda[]
   quartos Quarto[]
   finalizados Finalizado[]
+  drinks      Drinks[]
 }
 
 model Produto {
@@ -44,6 +45,8 @@ model Quarto {
   id          String   @id @default(uuid())
   nome        String
   tempo       String
+  formaPagamento String?
+  quarto      String?
   valor       Float
   observacoes String
   multa       Float
@@ -67,4 +70,18 @@ model Finalizado {
   dono      String?
   userId    String
   usuario   Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Drinks {
+  id             String   @id @default(uuid())
+  funcionaria    String
+  quantidade     Int      @default(0)
+  comissao       Float    @default(0.0)
+  itens          Json
+  meta           Int      @default(20)
+  periodoInicio  DateTime
+  periodoFim     DateTime
+  criadaEm       DateTime @default(now())
+  userId         String
+  usuario        Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

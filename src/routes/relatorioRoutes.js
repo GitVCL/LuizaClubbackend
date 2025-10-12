@@ -44,15 +44,7 @@ async function buscarRelatorio(userId, tipo) {
     }
   });
 
-  const quartos = await prisma.quarto.findMany({
-    where: {
-      userId,
-      status: 'finalizado',
-      encerradoEm: { gte: inicio, lte: fim }
-    }
-  });
-
-  return { comandas, quartos };
+  return { comandas };
 }
 
 // 🔹 Rota: /api/relatorio/periodo?inicio=...&fim=...&userId=...
@@ -75,16 +67,7 @@ router.get('/periodo', async (req, res) => {
       }
     });
 
-    const quartos = await prisma.quarto.findMany({
-      where: {
-        userId,
-        status: 'finalizado',
-        encerradoEm: { gte: inicioDate, lte: fimDate }
-      }
-    });
-
-    const todos = [...comandas, ...quartos];
-    res.json(todos);
+    res.json(comandas);
 
   } catch (err) {
     console.error('Erro ao buscar finalizados por período:', err);
