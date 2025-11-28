@@ -32,6 +32,11 @@ app.get('/', (req, res) => {
   res.send('Luiza Club API rodando com sucesso!');
 });
 
+// Fallback 404 em JSON para evitar páginas HTML padrão em rotas inexistentes
+app.use((req, res) => {
+  res.status(404).json({ error: `Rota não encontrada: ${req.method} ${req.originalUrl}` });
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
