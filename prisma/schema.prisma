@@ -3,85 +3,84 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Usuario {
-  id      String    @id @default(uuid())
-  email   String    @unique
-  senha   String
-  produtos Produto[]
-  comandas Comanda[]
-  quartos Quarto[]
-  finalizados Finalizado[]
+  id          String       @id @default(uuid())
+  email       String       @unique
+  senha       String
+  comandas    Comanda[]
   drinks      Drinks[]
+  finalizados Finalizado[]
+  produtos    Produto[]
+  quartos     Quarto[]
 }
 
 model Produto {
-  id        String   @id @default(uuid())
-  nome      String
-  valor     Float
-  unidades  Int
-  variantes Json
-  userId    String
-  usuario   Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(uuid())
+  nome         String
+  valor        Float
+  unidades     Int
+  variantes    String[]
+  comissionado Boolean  @default(false)
+  userId       String
+  usuario      Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Comanda {
-  id        String   @id @default(uuid())
-  nome      String
-  itens     Json
-  total     Float
-  dono      String
-  status    String
-  criadaEm  DateTime @default(now())
+  id          String    @id @default(uuid())
+  nome        String
+  itens       Json
+  total       Float
+  dono        String
+  status      String
+  criadaEm    DateTime  @default(now())
   encerradaEm DateTime?
-  userId    String
-  usuario   Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  usuario     Usuario   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Quarto {
-  id          String   @id @default(uuid())
-  nome        String
-  tempo       String
+  id             String    @id @default(uuid())
+  nome           String
+  tempo          String
+  valor          Float
+  multa          Float
+  taxa           Float
+  itens          Json
+  status         String    @default("ativo")
+  criadaEm       DateTime  @default(now())
+  userId         String
+  encerradoEm    DateTime?
+  observacoes    String
   formaPagamento String?
-  quarto      String?
-  valor       Float
-  observacoes String
-  multa       Float
-  taxa        Float
-  itens       Json
-  status      String   @default("ativo")
-  criadaEm    DateTime @default(now())
-  encerradoEm DateTime?
-  userId      String
-  usuario     Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quarto         String?
+  usuario        Usuario   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-
-
 model Finalizado {
-  id        String   @id @default(uuid())
-  tipo      String   // 'comanda' ou 'quarto'
-  data      DateTime @default(now())
-  itens     Json
-  total     Float
-  dono      String?
-  userId    String
-  usuario   Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id      String   @id @default(uuid())
+  tipo    String
+  data    DateTime @default(now())
+  itens   Json
+  total   Float
+  dono    String?
+  userId  String
+  usuario Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Drinks {
-  id             String   @id @default(uuid())
-  funcionaria    String
-  quantidade     Int      @default(0)
-  comissao       Float    @default(0.0)
-  itens          Json
-  meta           Int      @default(20)
-  periodoInicio  DateTime
-  periodoFim     DateTime
-  criadaEm       DateTime @default(now())
-  userId         String
-  usuario        Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String   @id @default(uuid())
+  funcionaria   String
+  quantidade    Int      @default(0)
+  comissao      Float    @default(0.0)
+  meta          Int      @default(20)
+  periodoInicio DateTime
+  periodoFim    DateTime
+  criadaEm      DateTime @default(now())
+  userId        String
+  itens         Json
+  usuario       Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
