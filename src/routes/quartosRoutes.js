@@ -16,6 +16,7 @@ function valorPorTempo(tempo) {
     case '1 hora': return 100;
     case '1 hora gringo': return 150;
     case 'pernoite': return 300;
+    case '30 minutos': return 50;
     case '25 minutos':
     case '40 minutos': return 50;
     default: return 0;
