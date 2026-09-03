@@ -13,7 +13,7 @@ function calcularComissao(quantidade, meta) {
 // Criar registro de drinks para um período/semana
 router.post('/', async (req, res) => {
   try {
-    const { funcionaria, quantidade = 0, meta = 20, periodoInicio, periodoFim, userId, itens } = req.body;
+    const { funcionaria, quantidade = 0, meta = 25, periodoInicio, periodoFim, userId, itens } = req.body;
 
     if (!funcionaria || !periodoInicio || !periodoFim || !userId) {
       return res.status(400).json({ error: 'Campos obrigatórios: funcionaria, periodoInicio, periodoFim, userId' });

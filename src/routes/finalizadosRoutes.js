@@ -12,8 +12,7 @@ router.get('/comandas/:userId', async (req, res) => {
       where: {
         userId: req.params.userId,
         status: 'finalizada'
-      },
-      include: { itens: true }
+      }
     });
     res.json(finalizadas);
   } catch (err) {
