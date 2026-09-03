@@ -55,14 +55,41 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Listar quartos por usuário
+// Listar quartos por usuário com filtros opcionais
+// Query params: status, dataInicio, dataFim, horaInicio, horaFim, nome
 router.get('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const lista = await prisma.quarto.findMany({
-      where: { userId },
-      orderBy: { criadaEm: 'desc' }
-    });
+    const { status, dataInicio, dataFim, horaInicio, horaFim, nome } = req.query;
+
+    const where = { userId };
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (status === 'finalizado' && (dataInicio || dataFim)) {
+      const hInicio = horaInicio || '00:00';
+      const hFim = horaFim || '23:59';
+
+      where.encerradoEm = {};
+      if (dataInicio) {
+        where.encerradoEm.gte = new Date(`${dataInicio}T${hInicio}:00`);
+      }
+      if (dataFim) {
+        where.encerradoEm.lte = new Date(`${dataFim}T${hFim}:59`);
+      }
+    }
+
+    if (nome && nome.trim()) {
+      where.nome = { contains: nome.trim(), mode: 'insensitive' };
+    }
+
+    const orderBy = status === 'finalizado'
+      ? { encerradoEm: 'desc' }
+      : { criadaEm: 'desc' };
+
+    const lista = await prisma.quarto.findMany({ where, orderBy });
     res.json(lista);
   } catch (err) {
     console.error('Erro ao listar quartos:', err);

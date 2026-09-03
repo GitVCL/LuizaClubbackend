@@ -30,13 +30,42 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Buscar comandas de um usuário
+// Buscar comandas de um usuário com filtros opcionais
+// Query params: status, dataInicio, dataFim, nome
 router.get('/:userId', async (req, res) => {
   try {
-    const lista = await prisma.comanda.findMany({
-      where: { userId: req.params.userId },
-      orderBy: { criadaEm: 'desc' } // organiza da mais nova para a mais antiga
-    });
+    const { userId } = req.params;
+    const { status, dataInicio, dataFim, nome } = req.query;
+
+    const where = { userId };
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (status === 'finalizada' && (dataInicio || dataFim)) {
+      where.encerradaEm = {};
+      if (dataInicio) {
+        where.encerradaEm.gte = new Date(`${dataInicio}T00:00:00`);
+      }
+      if (dataFim) {
+        where.encerradaEm.lte = new Date(`${dataFim}T23:59:59`);
+      }
+    }
+
+    if (nome && nome.trim()) {
+      const busca = nome.trim().toLowerCase();
+      where.OR = [
+        { dono: { contains: busca, mode: 'insensitive' } },
+        { nome: { contains: busca, mode: 'insensitive' } }
+      ];
+    }
+
+    const orderBy = status === 'finalizada'
+      ? { encerradaEm: 'desc' }
+      : { criadaEm: 'desc' };
+
+    const lista = await prisma.comanda.findMany({ where, orderBy });
     res.json(lista);
   } catch (err) {
     console.error(err);
