@@ -9,12 +9,13 @@ const prisma = new PrismaClient();
 // Criar comanda
 router.post('/', async (req, res) => {
   try {
-    const { nome, dono, total, status, userId, itens } = req.body;
+    const { nome, dono, garcom, total, status, userId, itens } = req.body;
 
     const novaComanda = await prisma.comanda.create({
       data: {
         nome,
         dono,
+        garcom,
         total,
         status,
         userId,
@@ -78,7 +79,7 @@ router.get('/:userId', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const id = req.params.id;
-    const { nome, itens, total, dono, status, encerradaEm } = req.body;
+    const { nome, itens, total, dono, garcom, status, encerradaEm } = req.body;
 
     const comandaAtualizada = await prisma.comanda.update({
       where: { id },
@@ -87,6 +88,7 @@ router.put('/:id', async (req, res) => {
         itens,
         total,
         dono,
+        garcom,
         status,
         encerradaEm, // <-- ESSENCIAL
       }

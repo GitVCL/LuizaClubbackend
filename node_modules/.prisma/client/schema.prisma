@@ -35,6 +35,7 @@ model Comanda {
   itens       Json
   total       Float
   dono        String
+  garcom      String?
   status      String
   criadaEm    DateTime  @default(now())
   encerradaEm DateTime?
